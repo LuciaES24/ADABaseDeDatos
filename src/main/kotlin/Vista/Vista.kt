@@ -86,4 +86,12 @@ class Vista {
         println("SALIR")
         println("Se ha cerrado correctamente")
     }
+
+    /**
+     * Imprime uno o varios trabajadores
+     * @param cadena string con la informacion de uno o varios trabajadores
+     */
+    fun imprimirTrabajador(cadena:String){
+        println(cadena)
+    }
 }

@@ -11,19 +11,20 @@ class GestorBBDD {
     /**
      * Hace la conexión a la base de datos
      */
-    fun conectarBBDD(){
+    fun conectarBBDD() : String{
         val url = "jdbc:oracle:thin:@localhost:1521:xe"
         val usuario = "ADA"
         val contrasena = "ADA"
+        var result = ""
         try {
             Class.forName("oracle.jdbc.driver.OracleDriver")
             conn = DriverManager.getConnection(url, usuario, contrasena)
         }catch (e: SQLException) {
-            println("Error en la conexión: ${e.message}")
+            result = "Error en la conexión: ${e.message}"
         } catch (e: ClassNotFoundException) {
-            println("No se encontró el driver JDBC: ${e.message}")
+            result = "No se encontró el driver JDBC: ${e.message}"
         }
-
+        return result
     }
 
     /**
@@ -33,17 +34,25 @@ class GestorBBDD {
         conn!!.close()
     }
 
+    fun buscarDNI(dni: String){
+        val stmt = conn!!.prepareStatement("SELECT DNI FROM TRABAJADORES WHERE DNI = ?")
+        stmt.setString(1,dni)
+
+    }
+
     /**
      * Añade un trabaador a la base de datos
      * @param trabajador objeto Trabajador con sus datos completos
      */
     fun agregarTrabajadorBaseDeDatos(trabajador: Trabajador){
-        val stmt = conn!!.prepareStatement("INSERT INTO TRABAJADORES (DNI , NOMBRE , APELLIDOS , FECHA_NAC ) VALUES (?, ?, ?, ?)")
-        stmt.setString(1, trabajador.dniTrabajador)
-        stmt.setString(2,trabajador.nombreTrabajador)
-        stmt.setString(3,trabajador.apellidosTrabajador)
-        stmt.setString(4,trabajador.fecha_nacTrabajador)
-        stmt.executeUpdate()
+        try {
+            val stmt = conn!!.prepareStatement("INSERT INTO TRABAJADORES (DNI , NOMBRE , APELLIDOS , FECHA_NAC ) VALUES (?, ?, ?, ?)")
+            stmt.setString(1, trabajador.dniTrabajador)
+            stmt.setString(2,trabajador.nombreTrabajador)
+            stmt.setString(3,trabajador.apellidosTrabajador)
+            stmt.setString(4,trabajador.fecha_nacTrabajador)
+            stmt.executeUpdate()
+        }
     }
 
     /**

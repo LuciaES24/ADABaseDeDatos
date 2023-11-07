@@ -29,10 +29,10 @@ class Controlador(vista : Vista) {
                 }
                 4-> {
                     var trabajadorBuscar = vista.pedirDatosBuscar()
-                    println(gestor.recuperarTrabajador(trabajadorBuscar))
+                    vista.imprimirTrabajador(gestor.recuperarTrabajador(trabajadorBuscar))
                 }
                 5-> {
-                    println(gestor.recuperarTrabajadores())
+                    vista.imprimirTrabajador(gestor.recuperarTrabajadores())
                 }
                 6-> {
                     vista.salirMenu()
