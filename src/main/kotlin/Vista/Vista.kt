@@ -91,7 +91,7 @@ class Vista {
      * Imprime uno o varios trabajadores
      * @param cadena string con la informacion de uno o varios trabajadores
      */
-    fun imprimirTrabajador(cadena:String){
+    fun imprimir(cadena:String){
         println(cadena)
     }
 }

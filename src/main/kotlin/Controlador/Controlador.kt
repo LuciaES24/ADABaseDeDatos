@@ -17,22 +17,22 @@ class Controlador(vista : Vista) {
             when(vista.imprimirMenu()){
                 1-> {
                     var trabajadorAgregar = vista.pedirAgregarDatos()
-                    gestor.agregarTrabajadorBaseDeDatos(trabajadorAgregar)
+                    vista.imprimir(gestor.agregarTrabajadorBaseDeDatos(trabajadorAgregar))
                 }
                 2-> {
                     var trabajadorActualizar = vista.pedirActualizarDatos()
-                    gestor.actualizarTrabajador(trabajadorActualizar.first,trabajadorActualizar.second)
+                    vista.imprimir(gestor.actualizarTrabajador(trabajadorActualizar.first,trabajadorActualizar.second))
                 }
                 3-> {
                     var trabajadorEliminar = vista.pedirDatosEliminar()
-                    gestor.eliminarTrabajador(trabajadorEliminar)
+                    vista.imprimir(gestor.eliminarTrabajador(trabajadorEliminar))
                 }
                 4-> {
                     var trabajadorBuscar = vista.pedirDatosBuscar()
-                    vista.imprimirTrabajador(gestor.recuperarTrabajador(trabajadorBuscar))
+                    vista.imprimir(gestor.recuperarTrabajador(trabajadorBuscar))
                 }
                 5-> {
-                    vista.imprimirTrabajador(gestor.recuperarTrabajadores())
+                    vista.imprimir(gestor.recuperarTrabajadores())
                 }
                 6-> {
                     vista.salirMenu()
