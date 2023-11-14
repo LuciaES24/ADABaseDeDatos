@@ -1,6 +1,6 @@
 package Modelo
 
-import java.io.File
+import guardarLog
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException
@@ -10,9 +10,8 @@ class GestorBBDD {
 
     var conn : Connection? = null
 
-    var log = File(".log")
+    var log = guardarLog("Modelo.log")
 
-    var escribirLog = ""
 
     /**
      * Hace la conexión a la base de datos
@@ -24,11 +23,12 @@ class GestorBBDD {
         try {
             Class.forName("oracle.jdbc.driver.OracleDriver")
             conn = DriverManager.getConnection(url, usuario, contrasena)
-            escribirLog += "\nCONNECT ${Date()} | Se ha conectado a la base de datos\n-\n"
+            log.appendText("\nCONNECT ${Date()} | Se ha conectado a la base de datos\n-\n")
+            conn!!.setAutoCommit(false)
         }catch (e: SQLException) {
-            escribirLog += "\nERROR CONNECT ${Date()} | Error en la conexión: ${e.message}\n-\n"
+            log.appendText("\nERROR CONNECT ${Date()} | Error en la conexión: ${e.message}\n-\n")
         } catch (e: ClassNotFoundException) {
-            escribirLog += "\nERROR CONNECT ${Date()} | No se encontró el driver JDBC: ${e.message}\n-\n"
+            log.appendText("\nERROR CONNECT ${Date()} | No se encontró el driver JDBC: ${e.message}\n-\n", charset("UTF-8"))
         }
     }
 
@@ -37,8 +37,7 @@ class GestorBBDD {
      */
     fun cerrarBBDD(){
         conn!!.close()
-        escribirLog += "EXIT ${Date()} | Se ha cerrado la base de datos\n-\n"
-        log.appendText(escribirLog)
+        log.appendText("EXIT ${Date()} | Se ha cerrado la base de datos\n-\n")
     }
 
     /**
@@ -46,11 +45,11 @@ class GestorBBDD {
      * @param trabajador objeto Trabajador con sus datos completos
      */
     fun agregarTrabajadorBaseDeDatos(trabajador: Trabajador): String {
-        var resultado = ""
+        var resultado: String
         try {
             val stmt = conn!!.prepareStatement("SELECT DNI FROM TRABAJADORES WHERE DNI = ?")
             stmt.setString(1,trabajador.dniTrabajador)
-            var result = stmt.executeQuery()
+            val result = stmt.executeQuery()
             var comprobar = ""
             while (result.next()){
                 comprobar+= result.getString("DNI")
@@ -63,12 +62,12 @@ class GestorBBDD {
                 stmtIns.setString(4,trabajador.fecha_nacTrabajador)
                 stmtIns.executeUpdate()
                 resultado = "Trabajador guardado correctamente"
-                escribirLog += "INSERT ${Date()} | Se ha introducido el trabajador ${trabajador.toString()}\n-\n"
+                log.appendText("INSERT ${Date()} | Se ha introducido el trabajador ${trabajador.toString()}\n-\n")
             }else{
                 throw Exception()
             }
         }catch (e:Exception){
-            escribirLog += "ERROR INSERT ${Date()} | La clave primaria ya se encuentra en la base de datos ${trabajador.toString()}\n-\n"
+            log.appendText("ERROR INSERT ${Date()} | La clave primaria ya se encuentra en la base de datos ${trabajador.toString()}\n-\n")
             resultado = "Ese DNI ya se encuentra en nuestro registro"
         }
         return resultado
@@ -97,11 +96,11 @@ class GestorBBDD {
                 throw Exception()
             }
             else{
-                escribirLog += "SELECT ${Date()} | Se ha encontrado el trabajador con DNI: $dni | $busqueda\n-\n"
+                log.appendText("SELECT ${Date()} | Se ha encontrado el trabajador con DNI: $dni | $busqueda\n-\n")
                 return busqueda
             }
         }catch (e:Exception){
-            escribirLog += "ERROR SELECT ${Date()} | No se encontro el DNI: $dni en la base de datos\n-\n"
+            log.appendText("ERROR SELECT ${Date()} | No se encontro el DNI: $dni en la base de datos\n-\n")
             return "No se encontraron resultados"
         }
     }
@@ -111,11 +110,11 @@ class GestorBBDD {
      * @param dni string con el DNI del trabajador que queremos eliminar
      */
     fun eliminarTrabajador(dni: String):String{
-        var resultado = ""
+        var resultado: String
         try {
             val stmt = conn!!.prepareStatement("SELECT DNI FROM TRABAJADORES WHERE DNI = ?")
             stmt.setString(1,dni)
-            var result = stmt.executeQuery()
+            val result = stmt.executeQuery()
             var comprobar = ""
             while (result.next()){
                 comprobar+= result.getString("DNI")
@@ -125,13 +124,13 @@ class GestorBBDD {
                 stmtDel.setString(1, dni)
                 stmtDel.executeUpdate()
                 resultado = "El trabajador se ha eliminado correctamente"
-                escribirLog += "DELETE ${Date()} | Se ha eliminado el trabajador con DNI : $dni\n-\n"
+                log.appendText("DELETE ${Date()} | Se ha eliminado el trabajador con DNI : $dni\n-\n")
             }else{
                 throw Exception()
             }
         }catch (e:Exception){
             resultado = "No se ha encontrado el trabajador"
-            escribirLog += "ERROR DELETE ${Date()} | No se encontró el trabajador con DNI: $dni para eliminarlo\n-\n"
+            log.appendText("ERROR DELETE ${Date()} | No se encontró el trabajador con DNI: $dni para eliminarlo\n-\n")
         }
         return resultado
     }
@@ -143,7 +142,7 @@ class GestorBBDD {
      * @return string con el resultado de la función
      */
     fun actualizarTrabajador(dni: String, trabajador: Trabajador):String{
-        var resultado = ""
+        var resultado: String
         try {
             val stmt = conn!!.prepareStatement("UPDATE TRABAJADORES SET NOMBRE = ?, APELLIDOS = ?, FECHA_NAC = ? WHERE DNI = ?")
             stmt.setString(1, trabajador.nombreTrabajador)
@@ -153,12 +152,12 @@ class GestorBBDD {
             val rowsUpdated = stmt.executeUpdate()
             if (rowsUpdated>0){
                 resultado = "Se ha actualizado correctamente"
-                escribirLog += "UPDATE ${Date()} | Se ha actualizado el trabajador con DNI : $dni con los datos ${trabajador.toString()}\n-\n"
+                log.appendText("UPDATE ${Date()} | Se ha actualizado el trabajador con DNI : $dni con los datos ${trabajador.toString()}\n-\n")
             }else{
                 throw Exception()
             }
         }catch (e:Exception){
-            escribirLog += "ERROR UPDATE ${Date()} | No se pudo actualizar el trabajador con DNI : $dni con los datos ${trabajador.toString()}\n-\n"
+            log.appendText("ERROR UPDATE ${Date()} | No se pudo actualizar el trabajador con DNI : $dni con los datos ${trabajador.toString()}\n-\n")
             resultado ="No se han encontrado resultados"
         }
         return resultado
@@ -169,7 +168,7 @@ class GestorBBDD {
      * @return string con todos los trabajadores con sus datos
      */
     fun recuperarTrabajadores() : String{
-        var resultado = ""
+        var resultado: String
         try {
             val stmt = conn!!.prepareStatement("SELECT DNI , NOMBRE , APELLIDOS , FECHA_NAC FROM TRABAJADORES")
             val result = stmt.executeQuery()
@@ -185,11 +184,11 @@ class GestorBBDD {
             if (busqueda == ""){
                 throw Exception()
             } else {
-                escribirLog += "SELECT ${Date()} | Se ha realizado la búsqueda de todos los trabajadores\n-\n"
+                log.appendText("SELECT ${Date()} | Se ha realizado la búsqueda de todos los trabajadores\n-\n")
                 resultado = busqueda
             }
         }catch (e:Exception){
-            escribirLog += "ERROR SELECT ${Date()} | No se encontraron resultados\n-\n"
+            log.appendText("ERROR SELECT ${Date()} | No se encontraron resultados\n-\n")
             resultado = "No se encontraron resultados"
         }
         return resultado
